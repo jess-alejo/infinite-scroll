@@ -23,7 +23,7 @@ h1 {
 
 .loader {
   position: fixed;
-  background: #5f2a6255;
+  background: rgba(0, 0, 0, 0.25);
   top: 0;
   bottom: 0;
   left: 0;

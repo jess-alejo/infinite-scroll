@@ -1,28 +1,25 @@
 const imageContainer = document.getElementById("image-container");
 const loader = document.getElementById("loader");
-let photosArray = [];
 
 const rootUrl = "https://api.unsplash.com/";
-const apiKey = "API_KEY";
-const limit = 10;
-const requestUrl = `${rootUrl}/photos/random/?client_id=${apiKey}&count=${limit}`;
+const maxSize = 30;
 
+let photosArray = [];
 let totalPhotos = 0;
-let isReady = false;
 let loadedPhotos = 0;
+let isReady = false;
 
-async function getPhotos() {
-  loader.hidden = false;
-
+async function getPhotos(limit) {
   try {
+    loader.hidden = false;
+    requestUrl = `${rootUrl}/photos/random/?client_id=${apiKey}&count=${limit}`;
     const response = await fetch(requestUrl);
     photosArray = await response.json();
     displayPhotos();
   } catch (error) {
     console.log(error);
+    loader.hidden = true;
   }
-
-  loader.hidden = true;
 }
 
 function setAttributes(element, attributes) {
@@ -39,30 +36,36 @@ function displayPhotos() {
       alt: photo.alt_description,
       title: photo.alt_description,
     });
+    img.addEventListener("load", imageLoaded);
 
     const imageLink = document.createElement("a");
     setAttributes(imageLink, { href: photo.links.html, target: "_blank" });
     imageLink.appendChild(img);
-    imageLink.addEventListener("loaded", () => {
-      loadedPhotos++;
-      if (loadedPhotos === totalPhotos) {
-        isReady = true;
-      }
-    });
 
     imageContainer.appendChild(imageLink);
     totalPhotos++;
   });
 }
 
+function imageLoaded() {
+  loadedPhotos++;
+  console.log("Images loaded", loadedPhotos);
+  if (loadedPhotos === totalPhotos) {
+    isReady = true;
+    loader.hidden = true;
+  }
+}
+
 window.addEventListener("scroll", () => {
   if (!isReady) return;
 
   const scrolled = window.innerHeight + window.scrollY;
-  const offset = document.body.offsetHeight - 1000;
+  const offset = document.body.offsetHeight - 600;
   if (scrolled >= offset) {
     isReady = false;
+    getPhotos(maxSize);
   }
 });
 
-getPhotos();
+// On Load
+getPhotos(5);
